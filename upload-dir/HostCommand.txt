@@ -1,0 +1,89 @@
+
+sudo apt update
+sudo apt install openjdk-8-jdk
+java -version
+
+sudo apt update
+sudo apt install maven
+mvn -version
+
+sudo apt update
+sudo apt install git
+
+--------Create database---------
+91.238.103.51
+sudo su - postgres
+psql
+create database dbsapyntk;
+create user usersapyntk with encrypted password '$544$B5542G)K$t!Ube22}xk';
+grant all privileges on database dbsapyntk to usersapyntk;
+
+port 5743
+
+git pull
+mvn package
+java -jar target/bandura.jar --server.port=8084
+
+
+--------nginx config--------------
+server {
+
+server_name   sapyn.tk *.sapyn.tk;
+location / {
+        proxy_pass         http://localhost:8084;
+        proxy_http_version 1.1;
+        proxy_set_header   Upgrade $http_upgrade;
+        proxy_set_header   Connection keep-alive;
+        proxy_set_header   Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+    }
+}
+
+sudo systemctl restart nginx
+
+------------Create service-- /etc/systemd/system/sapyn.tk.service--------------
+[Unit]
+Description=sapyn.tk
+
+[Service]
+WorkingDirectory=/var/www/java/springBootPD817/target
+ExecStart=/usr/bin/java -jar bandura.jar --server.port=8084
+Restart=always
+# Restart service after 10 seconds if the dotnet service crashes:
+RestartSec=10
+KillSignal=SIGINT
+SyslogIdentifier=dotnet-example
+User=root
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=false
+
+[Install]
+WantedBy=multi-user.target
+
+-------------------
+sudo systemctl enable sapyn.tk.service
+sudo systemctl start sapyn.tk.service
+sudo systemctl status sapyn.tk.service
+sudo systemctl stop sapyn.tk.service
+
+systemctl daemon-reload
+
+------------create ssl--------------
+https://www.youtube.com/watch?v=oRBCLBA1GrA&list=LLtGXPv9Ww-ZswEvWq2FHj5w&index=2&t=0s
+https://letsencrypt.org/ru/
+https://certbot.eff.org/lets-encrypt/ubuntubionic-nginx
+
+sudo apt-get update
+sudo apt-get install software-properties-common
+sudo add-apt-repository universe
+sudo add-apt-repository ppa:certbot/certbot
+sudo apt-get update
+
+apt-get install certbot python-certbot-nginx
+sudo apt-get install certbot python-certbot-nginx
+sudo certbot --nginx
+--or--
+sudo certbot certonly --nginx
+sudo certbot renew --dry-run
